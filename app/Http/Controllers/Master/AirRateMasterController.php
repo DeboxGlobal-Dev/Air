@@ -30,26 +30,30 @@ class AirRateMasterController extends Controller
                     "Id" => $post->id,
                     "ClientId" => $post->ClientId,
                     "AirId" => $post->AirId,
+                    "AirId" => getColumnValue(_AIRLINE_MASTER_,'id',$post->AirId,'Name'),
                     "FlightNumber" => $post->FlightNumber,
                     "FlightClass" => $post->FlightClass,
-                    "Currency" => $post->Currency,
-                    "ValidFrom" => $post->ValidFrom,
-                    "ValidTo" => $post->ValidTo,
-                    "AdultBaseFare" => $post->AdultBaseFare,
-                    "AdultAirlineTax" => $post->AdultAirlineTax,
-                    "PersonTotalCost" => $post->PersonTotalCost,
-                    "ChildBaseFare" => $post->ChildBaseFare,
-                    "ChildAirlineTax" => $post->ChildAirlineTax,
-                    "InfantTotalCost" => $post->InfantTotalCost,
-                    "InfantBaseFare" => $post->InfantBaseFare,
-                    "InfantAirlineTax" => $post->InfantAirlineTax,
-                    "TotalCost" => $post->TotalCost,
+                    "Currency" => getColumnValue(_CURRENCY_MASTER_,'id',$post->Currency,'CurrencyName'),
+                    // "ValidFrom" => $post->ValidFrom,
+                    // "ValidTo" => $post->ValidTo,
+                    // "AdultBaseFare" => $post->AdultBaseFare,
+                    // "AdultAirlineTax" => $post->AdultAirlineTax,
+                    // "PersonTotalCost" => $post->PersonTotalCost,
+                    // "ChildBaseFare" => $post->ChildBaseFare,
+                    // "ChildAirlineTax" => $post->ChildAirlineTax,
+                    // "InfantTotalCost" => $post->InfantTotalCost,
+                    // "InfantBaseFare" => $post->InfantBaseFare,
+                    // "InfantAirlineTax" => $post->InfantAirlineTax,
+                    // "TotalCost" => $post->TotalCost,
+                    "adult_cost" => json_decode($post->adult_cost),
+                    "child_cost" => json_decode($post->child_cost),
+                    "infant_cost" => json_decode($post->infant_cost),
                     "BaggageAllowance" => $post->BaggageAllowance,
                     "CancellationPolicy" => $post->CancellationPolicy,
                     "Remarks" => $post->Remarks,
                     "Status" => $post->Status,
                     "JsonItem" => $post->JsonItem,
-                    "Destination" => $post->Destination,
+                    // "Destination" => $post->Destination,
                     "AddedBy" => $post->AddedBy,
                     "UpdatedBy" => $post->UpdatedBy,
                     "Created_at" => $post->created_at,
@@ -76,12 +80,14 @@ class AirRateMasterController extends Controller
 
         call_logger('REQUEST COMES FROM ADD/UPDATE Air Rate: '.$request->getContent());
 
-        //try{
+        try{
             $id = $request->input('id');
             if($id == '') {
 
                 $businessvalidation =array(
-                    'ClientId' => 'required',
+                    'FlightNumber' => 'required',
+                    'FlightClass' => 'required',
+                    'Currency' => 'required',
                 );
 
                 $validatordata = validator::make($request->all(), $businessvalidation);
@@ -95,23 +101,26 @@ class AirRateMasterController extends Controller
                     'FlightNumber' => $request->FlightNumber,
                     'FlightClass' => $request->FlightClass,
                     'Currency' => $request->Currency,
-                    'ValidFrom' => $request->ValidFrom,
-                    'ValidTo' => $request->ValidTo,
-                    'AdultBaseFare' => $request->AdultBaseFare,
-                    'AdultAirlineTax' => $request->AdultAirlineTax,
-                    'PersonTotalCost' => $request->PersonTotalCost,
-                    'ChildBaseFare' => $request->ChildBaseFare,
-                    'ChildAirlineTax' => $request->ChildAirlineTax,
-                    'InfantTotalCost' => $request->InfantTotalCost,
-                    'InfantBaseFare' => $request->InfantBaseFare,
-                    'InfantAirlineTax' => $request->InfantAirlineTax,
-                    'TotalCost' => $request->TotalCost,
+                    // 'ValidFrom' => $request->ValidFrom,
+                    // 'ValidTo' => $request->ValidTo,
+                    // 'AdultBaseFare' => $request->AdultBaseFare,
+                    // 'AdultAirlineTax' => $request->AdultAirlineTax,
+                    // 'PersonTotalCost' => $request->PersonTotalCost,
+                    // 'ChildBaseFare' => $request->ChildBaseFare,
+                    // 'ChildAirlineTax' => $request->ChildAirlineTax,
+                    // 'InfantTotalCost' => $request->InfantTotalCost,
+                    // 'InfantBaseFare' => $request->InfantBaseFare,
+                    // 'InfantAirlineTax' => $request->InfantAirlineTax,
+                    // 'TotalCost' => $request->TotalCost,
+                    'adult_cost'=> json_encode($request->adult_cost),
+                    'child_cost'=> json_encode($request->child_cost),
+                    'infant_cost'=> json_encode($request->infant_cost),
                     'BaggageAllowance' => $request->BaggageAllowance,
                     'CancellationPolicy' => $request->CancellationPolicy,
                     'Remarks' => $request->Remarks,
                     'Status' => $request->Status,
                     'JsonItem' => $request->getContent(),
-                    'Destination' => $request->Destination,
+                    //'Destination' => $request->Destination,
                     'AddedBy' => $request->AddedBy,
                     'created_at' => now()
                 ]);
@@ -129,7 +138,9 @@ class AirRateMasterController extends Controller
                 $edit = AirRateMaster::find($id);
 
                 $businessvalidation =array(
-                    'ClientId' => 'required',
+                    'FlightNumber' => 'required',
+                    'FlightClass' => 'required',
+                    'Currency' => 'required',
                 );
 
                 $validatordata = validator::make($request->all(), $businessvalidation);
@@ -143,24 +154,27 @@ class AirRateMasterController extends Controller
                         $edit->FlightNumber = $request->input('FlightNumber');
                         $edit->FlightClass = $request->input('FlightClass');
                         $edit->Currency = $request->input('Currency');
-                        $edit->ValidFrom = $request->input('ValidFrom');
-                        $edit->ValidTo = $request->input('ValidTo');
-                        $edit->AdultBaseFare = $request->input('AdultBaseFare');
-                        $edit->AdultAirlineTax = $request->input('AdultAirlineTax');
-                        $edit->PersonTotalCost = $request->input('PersonTotalCost');
-                        $edit->ChildBaseFare = $request->input('ChildBaseFare');
-                        $edit->ChildAirlineTax = $request->input('ChildAirlineTax');
-                        $edit->InfantTotalCost = $request->input('InfantTotalCost');
-                        $edit->InfantBaseFare = $request->input('InfantBaseFare');
-                        $edit->InfantAirlineTax = $request->input('InfantAirlineTax');
-                        $edit->TotalCost = $request->input('TotalCost');
+                        $edit->adult_cost = json_encode($request->input('adult_cost'));
+                        $edit->child_cost = json_encode($request->input('child_cost'));
+                        $edit->infant_cost = json_encode($request->input('infant_cost'));
+                        // $edit->ValidFrom = $request->input('ValidFrom');
+                        // $edit->ValidTo = $request->input('ValidTo');
+                        // $edit->AdultBaseFare = $request->input('AdultBaseFare');
+                        // $edit->AdultAirlineTax = $request->input('AdultAirlineTax');
+                        // $edit->PersonTotalCost = $request->input('PersonTotalCost');
+                        // $edit->ChildBaseFare = $request->input('ChildBaseFare');
+                        // $edit->ChildAirlineTax = $request->input('ChildAirlineTax');
+                        // $edit->InfantTotalCost = $request->input('InfantTotalCost');
+                        // $edit->InfantBaseFare = $request->input('InfantBaseFare');
+                        // $edit->InfantAirlineTax = $request->input('InfantAirlineTax');
+                        // $edit->TotalCost = $request->input('TotalCost');
                         $edit->BaggageAllowance = $request->input('BaggageAllowance');
                         $edit->CancellationPolicy = $request->input('CancellationPolicy');
                         $edit->Remarks = $request->input('Remarks');
                         $edit->Status = $request->input('Status');
                         $edit->UpdatedBy = $request->input('UpdatedBy');
                         $edit->JsonItem = $request->getContent();
-                        $edit->Destination = $request->input('Destination');
+                        //$edit->Destination = $request->input('Destination');
                         $edit->updated_at = now();
                         $edit->save();
 
@@ -170,10 +184,22 @@ class AirRateMasterController extends Controller
                     }
                 }
             }
-        // }catch (\Exception $e){
-        //     call_logger("Exception Error  ===>  ". $e->getMessage());
-        //     return response()->json(['Status' => -1, 'Message' => 'Exception Error Found']);
-        // }
+        }catch (\Exception $e){
+            call_logger("Exception Error  ===>  ". $e->getMessage());
+            return response()->json(['Status' => -1, 'Message' => 'Exception Error Found']);
+        }
+    }
+
+    public function destroy(Request $request)
+    {
+        $brands = AirRateMaster::find($request->id);
+        $brands->delete();
+
+        if ($brands) {
+            return response()->json(['Status' => 1, 'Message' => 'Data deleted successfully']);
+        } else {
+            return response()->json(['Status' => 0, 'Message' => 'Failed to delete data. Record not found.'], 500);
+        }
     }
 
 

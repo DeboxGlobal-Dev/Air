@@ -11,8 +11,10 @@ use App\Http\Controllers\Master\FilterAirRateController;
 //===============================AIR CONTROLLERS============================
 Route::post('/searchairrate',[SearchAirRateController::class,'index']);
 Route::post('/filterairrate',[FilterAirRateController::class,'index']);
-Route::post('/addupdateairratemaster',[AirRateMasterController::class,'store']);
-Route::post('/airratemasterlist',[AirRateMasterController::class,'index']);
+
+Route::post('/addupdateairrate',[AirRateMasterController::class,'store']);
+Route::post('/airratelist',[AirRateMasterController::class,'index']);
+Route::post('/deleteairrate',[AirRateMasterController::class,'destroy']);
 //===============================END HERE===================================
 
 

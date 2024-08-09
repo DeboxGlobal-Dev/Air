@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Master;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Http;
 use App\Models\Master\AirRateMaster;
 
 class AirRateMasterController extends Controller
@@ -26,14 +27,42 @@ class AirRateMasterController extends Controller
         if ($posts->isNotEmpty()) {
             $arrayDataRows = [];
             foreach ($posts as $post){
+
+                $airResponse = Http::post(_MASTER_URL_ . 'airlinemasterlist', [
+                    'id' => $post->AirId
+                ]);
+
+                if ($airResponse->successful()) {
+                    $airData = $airResponse->json();
+                    $airName = $airData['DataList']['0']['Name'] ?? Null;
+
+                }
+
+                $currencyResponse = Http::post(_MASTER_URL_ . 'currencymasterlist', [
+                    'id' => $post->Currency
+                ]);
+
+                if ($currencyResponse->successful()) {
+                    $currencyData = $currencyResponse->json();
+                    $currencyName = $currencyData['DataList']['0']['CurrencyName'] ?? Null;
+                }
+
+                $flightClassResponse = Http::post(_MASTER_URL_ . 'flightclasslist', [
+                    'id' => $post->FlightClass
+                ]);
+
+                if ($flightClassResponse->successful()) {
+                    $flightClassData = $flightClassResponse->json();
+                    $flightClassName = $flightClassData['DataList']['0']['Name'] ?? Null;
+                }
+
                 $arrayDataRows[] = [
                     "Id" => $post->id,
                     "ClientId" => $post->ClientId,
-                    "AirId" => $post->AirId,
-                    "AirId" => getColumnValue(_AIRLINE_MASTER_,'id',$post->AirId,'Name'),
+                    "AirId" => ['id'=>$post->AirId,'Name'=>$airName],
                     "FlightNumber" => $post->FlightNumber,
-                    "FlightClass" => $post->FlightClass,
-                    "Currency" => getColumnValue(_CURRENCY_MASTER_,'id',$post->Currency,'CurrencyName'),
+                    "FlightClass" => ['id' => $post->FlightClass,'Name'=>$flightClassName],
+                    "Currency" => ['id' => $post->Currency,'CurrencyName'=>$currencyName],
                     // "ValidFrom" => $post->ValidFrom,
                     // "ValidTo" => $post->ValidTo,
                     // "AdultBaseFare" => $post->AdultBaseFare,
